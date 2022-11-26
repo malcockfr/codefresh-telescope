@@ -8,6 +8,6 @@ return telescope.register_extension {
   setup = function(ext_config, config)
   end,
   exports = {
-    codefresh_builds = require("telescope._extensions.codefresh_builds").codefresh_builds
+    codefresh_builds = require("codefresh_builds").codefresh_builds
   },
 }
