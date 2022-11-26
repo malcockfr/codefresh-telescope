@@ -16,7 +16,7 @@ local function branch_name()
   end
 end
 
-M.builds = function(opts)
+M.get = function(opts)
   opts = opts or {}
   opts.cwd = opts.cwd or vim.fn.getcwd()
 
