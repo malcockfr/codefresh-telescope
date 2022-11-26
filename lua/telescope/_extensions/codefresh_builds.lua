@@ -1,13 +1,7 @@
-local ok, telescope = pcall(require, 'telescope')
+local codefresh_builds = require 'telescope._extensions.codefresh_builds'
 
-if not ok then
-  error "it's broken'"
-end
-
-return telescope.register_extension {
-  setup = function(ext_config, config)
-  end,
+return require 'telescope'.register_extension {
   exports = {
-    codefresh_builds = require("codefresh_builds").codefresh_builds
+    codefresh_builds = codefresh_builds.codefresh_builds
   },
 }
