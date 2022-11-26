@@ -5,6 +5,8 @@ local pickers = require("telescope.pickers")
 local utils = require("telescope.utils")
 local sorters = require("telescope.sorters")
 
+M = {}
+
 local function branch_name()
   local branch = vim.fn.system("git branch --show-current 2> /dev/null | tr -d '\n'")
   if branch ~= "" then
@@ -14,7 +16,7 @@ local function branch_name()
   end
 end
 
-return function(opts)
+M.codefresh_builds = function(opts)
   opts = opts or {}
   opts.cwd = opts.cwd or vim.fn.getcwd()
 
@@ -54,3 +56,5 @@ return function(opts)
     end,
   }):find()
 end
+
+return M
