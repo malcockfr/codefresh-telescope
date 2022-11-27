@@ -1,4 +1,4 @@
-local has_telescope, _ = pcall(require, 'telescope')
+local has_telescope, telescope = pcall(require, 'telescope')
 
 if not has_telescope then
   error('This plugins requires nvim-telescope/telescope.nvim')
@@ -50,7 +50,7 @@ M.builds = function(opts)
   end
 
   pickers.new(opts, {
-    prompt_title = 'Codefresh Builds',
+    prompt_title = string.format("Codefresh Builds for %s", branch_name()),
     finder = finders.new_table {
       results = entries,
       entry_maker = function(entry)
@@ -79,10 +79,8 @@ M.builds = function(opts)
   }):find()
 end
 
-M.builds()
-
--- return telescope.register_extension {
---   exports = {
---     builds = M.builds
---   },
--- }
+return telescope.register_extension {
+  exports = {
+    builds = M.builds
+  },
+}
