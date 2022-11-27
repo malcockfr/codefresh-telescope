@@ -8,6 +8,7 @@ local action_state = require("telescope.actions.state")
 local actions = require("telescope.actions")
 local finders = require("telescope.finders")
 local pickers = require("telescope.pickers")
+-- local previewers = require("telescope.previewers")
 local utils = require("telescope.utils")
 local sorters = require("telescope.sorters")
 
@@ -22,12 +23,22 @@ local function branch_name()
   end
 end
 
+local build_state = {
+  error = "❌",
+  success = "✅",
+  running = "🚧",
+  terminating = "☠️",
+  terminated = "☠️",
+  pending = "🚧",
+  delayed = "✋",
+}
+
 M.builds = function(opts)
   opts = opts or {}
   opts.cwd = opts.cwd or vim.fn.getcwd()
 
   local results = utils.get_os_command_output({
-    "codefresh", "get", "builds", "--select-columns", "id,pipeline-name,branch", "--branch", branch_name()
+    "codefresh", "get", "builds", "--select-columns", "id,pipeline-name,status", "--branch", branch_name()
   }, opts.cwd)
 
   local entries = {}
@@ -45,11 +56,16 @@ M.builds = function(opts)
       entry_maker = function(entry)
         return {
           value = entry[1],
-          display = string.format("%s\t\t\t\t\t%s", entry[2], entry[3]),
+          display = string.format("%s - %s", build_state[entry[3]], entry[2]),
           ordinal = entry[3],
         }
       end
     },
+    -- previewer = previewers.new_termopen_previewer {
+    --   get_command = function(entry)
+    --     return { "codefresh", "logs", "-f", entry.value }
+    --   end,
+    -- },
     sorter = sorters.get_generic_fuzzy_sorter(),
     attach_mappings = function(prompt_bufnr, map)
       actions.select_default:replace(function()
@@ -63,8 +79,10 @@ M.builds = function(opts)
   }):find()
 end
 
-return telescope.register_extension {
-  exports = {
-    builds = M.builds
-  },
-}
+M.builds()
+
+-- return telescope.register_extension {
+--   exports = {
+--     builds = M.builds
+--   },
+-- }
