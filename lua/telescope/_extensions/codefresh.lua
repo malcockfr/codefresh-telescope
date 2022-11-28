@@ -38,14 +38,14 @@ M.builds = function(opts)
   opts.cwd = opts.cwd or vim.fn.getcwd()
 
   local results = utils.get_os_command_output({
-    "codefresh", "get", "builds", "--select-columns", "id,pipeline-name,status,started", "--branch",
+    "codefresh", "get", "builds", "--select-columns", "id,status,started,pipeline-name", "--branch",
     branch_name()
   }, opts.cwd)
 
   local entries = {}
   for _, build in ipairs(results) do
     local id, pipeline, status, started = string.match(build,
-      "(%w+)%s*([%w%p]+)%s*([%w]+)%s*([%w%s%p]+)")
+      "(%w+)%s*(%w+)%s*(%d+-%d+-%d+,%s%d+:%d+:%d+)%s*([%w%p]+)")
     if id ~= "ID" then
       table.insert(entries, { id, pipeline, status, started })
     end
@@ -58,8 +58,8 @@ M.builds = function(opts)
       entry_maker = function(entry)
         return {
           value = entry[1],
-          display = string.format("%s - %s - %s", build_state[entry[3]], entry[4], entry[2]),
-          ordinal = entry[3],
+          display = string.format("%s - %s - %s", build_state[entry[2]], entry[3], entry[4]),
+          ordinal = entry[4],
         }
       end
     },
@@ -76,7 +76,7 @@ M.builds = function(opts)
   }):find()
 end
 
--- M.builds()
+M.builds()
 
 return telescope.register_extension {
   exports = {
