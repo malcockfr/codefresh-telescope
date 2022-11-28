@@ -8,7 +8,6 @@ local action_state = require("telescope.actions.state")
 local actions = require("telescope.actions")
 local finders = require("telescope.finders")
 local pickers = require("telescope.pickers")
--- local previewers = require("telescope.previewers")
 local utils = require("telescope.utils")
 local sorters = require("telescope.sorters")
 
@@ -24,13 +23,14 @@ local function branch_name()
 end
 
 local build_state = {
-  error = "❌",
-  success = "✅",
   running = "🚧",
-  terminating = "☠️",
+  success = "✅",
+  error = "❌",
   terminated = "☠️",
-  pending = "🚧",
+  terminating = "☠️",
   delayed = "✋",
+  pending = "🚧",
+  elected = "🗳️",
 }
 
 M.builds = function(opts)
@@ -38,12 +38,14 @@ M.builds = function(opts)
   opts.cwd = opts.cwd or vim.fn.getcwd()
 
   local results = utils.get_os_command_output({
-    "codefresh", "get", "builds", "--select-columns", "id,pipeline-name,status,started", "--branch", branch_name()
+    "codefresh", "get", "builds", "--select-columns", "id,pipeline-name,status,started", "--branch",
+    branch_name()
   }, opts.cwd)
 
   local entries = {}
   for _, build in ipairs(results) do
-    local id, pipeline, status, started = string.match(build, "(%w+)%s*([%w%p]+)%s*([%w]+)%s*([%w%s%p]+)")
+    local id, pipeline, status, started = string.match(build,
+      "(%w+)%s*([%w%p]+)%s*([%w]+)%s*([%w%s%p]+)")
     if id ~= "ID" then
       table.insert(entries, { id, pipeline, status, started })
     end
@@ -56,16 +58,11 @@ M.builds = function(opts)
       entry_maker = function(entry)
         return {
           value = entry[1],
-          display = string.format("%s - %s - %s", build_state[entry[3]], entry[2], entry[4]),
-          ordinal = entry[4],
+          display = string.format("%s - %s - %s", build_state[entry[3]], entry[4], entry[2]),
+          ordinal = entry[3],
         }
       end
     },
-    -- previewer = previewers.new_termopen_previewer {
-    --   get_command = function(entry)
-    --     return { "codefresh", "logs", "-f", entry.value }
-    --   end,
-    -- },
     sorter = sorters.get_generic_fuzzy_sorter(),
     attach_mappings = function(prompt_bufnr, map)
       actions.select_default:replace(function()
@@ -79,7 +76,7 @@ M.builds = function(opts)
   }):find()
 end
 
-M.builds()
+-- M.builds()
 
 return telescope.register_extension {
   exports = {
