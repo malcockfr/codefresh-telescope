@@ -10,9 +10,10 @@ Add the extensions top your list of plugins:
 ```
 lvim.plugins = {
   ...
-  { "tyru/open-browser.vim" },
-  { "malcockfr/telescope_codefresh" }
-}
+  { "malcockfr/telescope_codefresh",
+    requires = { "tyru/open-browser.vim" },
+  }
+} 
 ```
 
 ## Setup
