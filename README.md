@@ -16,6 +16,8 @@ lvim.plugins = {
 } 
 ```
 
+Then run `:PackerSync` to install it.
+
 ## Setup
 
 Tell Telescope to load the extension
