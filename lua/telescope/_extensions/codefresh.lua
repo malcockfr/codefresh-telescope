@@ -117,7 +117,7 @@ local refresh_finder = function(prompt_bufnr, finder)
 end
 
 M.get_builds = function(opts)
-  local results = M.build_finder()
+  local results = get_builds()
   pickers.new(opts, {
     prompt_title = string.format("Codefresh Builds for %s", branch_name()),
     sorter = sorters.get_generic_fuzzy_sorter(),
