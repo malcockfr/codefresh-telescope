@@ -194,8 +194,6 @@ M.get_pipelines = function(opts)
   }):find()
 end
 
-M.get_builds()
-
 return telescope.register_extension {
   exports = {
     codefresh = M.get_builds,
