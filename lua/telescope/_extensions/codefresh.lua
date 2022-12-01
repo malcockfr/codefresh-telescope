@@ -57,8 +57,8 @@ local terminate_build = function(id)
   check_y_or_n(
     string.format("Are you sure you want to terminate build ID %s? (y/N) ", id),
     function()
-      -- local cwd = vim.fn.getcwd()
-      -- utils.get_os_command_output({ "codefresh", "terminate", id }, cwd)
+      local cwd = vim.fn.getcwd()
+      utils.get_os_command_output({ "codefresh", "terminate", id }, cwd)
       print(vim.fn.printf("Terminating build ID %s", id))
     end)
 end
@@ -71,8 +71,8 @@ local restart_build = function(entry)
   check_y_or_n(
     string.format("Are you sure you want to restart build ID %s? (y/N) ", entry.value),
     function()
-      -- local cwd = vim.fn.getcwd()
-      -- utils.get_os_command_output({ "codefresh", "restart", entry }, cwd)
+      local cwd = vim.fn.getcwd()
+      utils.get_os_command_output({ "codefresh", "restart", entry }, cwd)
       print(vim.fn.printf("Restarting build ID %s", entry.value))
     end)
 end
@@ -112,7 +112,7 @@ local get_pipelines = function()
 end
 
 local refresh_finder = function(prompt_bufnr, finder)
-  print("REFRESH")
+  vim.notify("Refreshing...")
   local current_picker = action_state.get_current_picker(prompt_bufnr)
   current_picker:refresh(finder, {})
 end
