@@ -12,7 +12,7 @@ local pickers = require("telescope.pickers")
 local utils = require("telescope.utils")
 local sorters = require("telescope.sorters")
 
-M = {}
+local M = {}
 
 local function branch_name()
   local branch = vim.fn.system("git branch --show-current 2> /dev/null | tr -d '\n'")
