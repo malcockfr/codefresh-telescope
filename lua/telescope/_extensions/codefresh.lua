@@ -111,21 +111,29 @@ local get_pipelines = function()
   return entries
 end
 
+local refresh_finder = function(prompt_bufnr, finder)
+  print("REFRESH")
+  local current_picker = action_state.get_current_picker(prompt_bufnr)
+  current_picker:refresh(finder, {})
+end
+
+M.build_finder = finders.new_table {
+  results = get_builds(),
+  entry_maker = function(entry)
+    return {
+      value = entry[1],
+      display = string.format("%s - %s - %s", build_state[entry[2]], entry[3], entry[4]),
+      ordinal = entry[4],
+      state = entry[2],
+    }
+  end
+}
+
 M.get_builds = function(opts)
   pickers.new(opts, {
     prompt_title = string.format("Codefresh Builds for %s", branch_name()),
-    finder = finders.new_table {
-      results = get_builds(),
-      entry_maker = function(entry)
-        return {
-          value = entry[1],
-          display = string.format("%s - %s - %s", build_state[entry[2]], entry[3], entry[4]),
-          ordinal = entry[4],
-          state = entry[2],
-        }
-      end
-    },
     sorter = sorters.get_generic_fuzzy_sorter(),
+    finder = M.build_finder,
     attach_mappings = function(prompt_bufnr, map)
       actions.select_default:replace(function()
         actions.close(prompt_bufnr)
@@ -151,6 +159,7 @@ M.get_builds = function(opts)
       map('n', 'x', actions.terminate)
       map('n', 'r', actions.restart)
       map('n', 'l', actions.logs)
+      map('n', 'R', refresh_finder(prompt_bufnr, M.build_finder))
 
       return true
     end,
@@ -184,6 +193,8 @@ M.get_pipelines = function(opts)
     end,
   }):find()
 end
+
+M.get_builds()
 
 return telescope.register_extension {
   exports = {
