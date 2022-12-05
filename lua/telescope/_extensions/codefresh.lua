@@ -145,28 +145,23 @@ local get_pipelines = function()
   return entries
 end
 
-local refresh_finder = function(prompt_bufnr, finder)
-  vim.notify("Refreshing...")
-  local current_picker = action_state.get_current_picker(prompt_bufnr)
-  current_picker:refresh(finder, {})
-end
-
 M.get_builds = function(opts)
   local results = get_builds()
+  local finder = finders.new_table {
+    results = results,
+    entry_maker = function(entry)
+      return {
+        value = entry[1],
+        display = string.format("%s - %s - %s", build_state[entry[2]], entry[3], entry[4]),
+        ordinal = entry[4],
+        state = entry[2],
+      }
+    end
+  }
   pickers.new(opts, {
     prompt_title = string.format("Codefresh Builds for %s", branch_name()),
+    finder = finder,
     sorter = sorters.get_generic_fuzzy_sorter(),
-    finder = finders.new_table {
-      results = results,
-      entry_maker = function(entry)
-        return {
-          value = entry[1],
-          display = string.format("%s - %s - %s", build_state[entry[2]], entry[3], entry[4]),
-          ordinal = entry[4],
-          state = entry[2],
-        }
-      end
-    },
     attach_mappings = function(prompt_bufnr, map)
       actions.select_default:replace(function()
         actions.close(prompt_bufnr)
@@ -188,11 +183,18 @@ M.get_builds = function(opts)
         local selection = action_state.get_selected_entry()
         vim.cmd(string.format("9TermExec cmd='codefresh logs -f %s'", selection.value))
       end
+      actions.refresh_finder = function()
+        utils.notify("codefresh", { msg = "Refreshing...", level = "INFO" })
+        local current_picker = action_state.get_current_picker(prompt_bufnr)
+        results = get_builds()
+        current_picker:refresh(finder, {})
+      end
+
 
       map('n', 'x', actions.terminate)
       map('n', 'r', actions.restart)
       map('n', 'l', actions.logs)
-      map('n', 'R', refresh_finder(prompt_bufnr, get_builds))
+      map('n', 'R', actions.refresh_finder)
 
       return true
     end,
