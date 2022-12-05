@@ -103,7 +103,7 @@ local restart_build = function(entry)
     string.format("Are you sure you want to restart build ID %s? (y/N) ", entry.value),
     function()
       local cwd = vim.fn.getcwd()
-      utils.get_os_command_output({ "codefresh", "restart", entry }, cwd)
+      get_os_command_output({ "codefresh", "restart", entry }, cwd)
       utils.notify("codefresh", {
         msg = string.format("Restarting build ID %s", entry.value),
         level = "INFO"
@@ -113,7 +113,7 @@ end
 
 local get_builds = function()
   local cwd = vim.fn.getcwd()
-  local results = utils.get_os_command_output({
+  local results = get_os_command_output({
     "codefresh", "get", "builds", "--select-columns", "id,status,started,pipeline-name", "--branch",
     branch_name()
   }, cwd)
@@ -131,7 +131,7 @@ end
 
 local get_pipelines = function()
   local cwd = vim.fn.getcwd()
-  local results = utils.get_os_command_output({
+  local results = get_os_command_output({
     "codefresh", "get", "pipelines", "--all", "--select-columns", "name"
   }, cwd)
 
