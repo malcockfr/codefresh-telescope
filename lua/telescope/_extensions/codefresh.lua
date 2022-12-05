@@ -10,6 +10,7 @@ local finders = require("telescope.finders")
 local pickers = require("telescope.pickers")
 local utils = require("telescope.utils")
 local sorters = require("telescope.sorters")
+local job = require("plenary.job")
 
 local M = {}
 
@@ -40,6 +41,28 @@ local restartable = {
   success = true,
 }
 
+-- Override utils.get_os_command_output() with added 30s timeout
+local function get_os_command_output(cmd, cwd)
+  if type(cmd) ~= "table" then
+    utils.notify("get_os_command_output", {
+      msg = "cmd has to be a table",
+      level = "ERROR",
+    })
+    return {}
+  end
+  local command = table.remove(cmd, 1)
+  local stderr = {}
+  local stdout, ret = job:new({
+    command = command,
+    args = cmd,
+    cwd = cwd,
+    on_stderr = function(_, data)
+      table.insert(stderr, data)
+    end,
+  }):sync(30000)
+  return stdout, ret, stderr
+end
+
 local check_y_or_n = function(prompt, yes_func)
   vim.ui.select({ 'Yes', 'No' }, {
     prompt = prompt,
@@ -47,7 +70,10 @@ local check_y_or_n = function(prompt, yes_func)
     if choice == 'Yes' then
       yes_func()
     else
-      print("Backing away slowly!!")
+      utils.notify("codefresh", {
+        msg = "Backing away slowly!!",
+        level = "INFO"
+      })
     end
   end)
 end
@@ -57,14 +83,20 @@ local terminate_build = function(id)
     string.format("Are you sure you want to terminate build ID %s? (y/N) ", id),
     function()
       local cwd = vim.fn.getcwd()
-      utils.get_os_command_output({ "codefresh", "terminate", id }, cwd)
-      print(vim.fn.printf("Terminating build ID %s", id))
+      get_os_command_output({ "codefresh", "terminate", id }, cwd)
+      utils.notify("codefresh", {
+        msg = string.format("Terminating build ID %s", id),
+        level = "INFO"
+      })
     end)
 end
 
 local restart_build = function(entry)
   if not restartable[entry.state] then
-    print(string.format("Build %s is not restartable", entry.value))
+    utils.notify("codefresh", {
+      msg = string.format("Build %s is not restartable", entry.value),
+      level = "INFO"
+    })
     return
   end
   check_y_or_n(
@@ -72,7 +104,10 @@ local restart_build = function(entry)
     function()
       local cwd = vim.fn.getcwd()
       utils.get_os_command_output({ "codefresh", "restart", entry }, cwd)
-      print(vim.fn.printf("Restarting build ID %s", entry.value))
+      utils.notify("codefresh", {
+        msg = string.format("Restarting build ID %s", entry.value),
+        level = "INFO"
+      })
     end)
 end
 
