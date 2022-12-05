@@ -38,7 +38,5 @@ The default action (enter) will open the build in the Codefresh UI.
 
 
 ## TODO
-* Fix timeout issue with the codefresh command
-* Add more actions to terminate, restart a buiid
-* Add new picker to list pipelines and start builds
-* Add previwer to show build logs
+* start builds from pipline picker
+* Handle errors in restart and terminate commands
