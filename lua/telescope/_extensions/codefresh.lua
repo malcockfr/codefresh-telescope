@@ -164,22 +164,18 @@ M.get_builds = function(opts)
     sorter = sorters.get_generic_fuzzy_sorter(),
     attach_mappings = function(prompt_bufnr, map)
       actions.select_default:replace(function()
-        actions.close(prompt_bufnr)
         local selection = action_state.get_selected_entry()
         vim.api.nvim_command("OpenBrowser https://g.codefresh.io/build/" .. selection.value)
       end)
       actions.terminate = function()
-        actions.close(prompt_bufnr)
         local selection = action_state.get_selected_entry()
         terminate_build(selection.value)
       end
       actions.restart = function()
-        actions.close(prompt_bufnr)
         local selection = action_state.get_selected_entry()
         restart_build(selection)
       end
       actions.logs = function()
-        actions.close(prompt_bufnr)
         local selection = action_state.get_selected_entry()
         vim.cmd(string.format("9TermExec cmd='codefresh logs -f %s'", selection.value))
       end
